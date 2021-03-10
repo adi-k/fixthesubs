@@ -71,7 +71,6 @@ var count = [];
 
 
 
-
 const input = document.querySelector('input[type="file"]');
 
 input.addEventListener('change', function(e) {
@@ -103,15 +102,11 @@ input.addEventListener('change', function(e) {
                     utfOrAnsi = false;
                 }
 
-
-
-
             }
 
             reader.readAsText(input.files[i]);
         })(input.files[i]);
     }
-
 
 
 
@@ -209,9 +204,6 @@ document.getElementById("dugme").addEventListener("click", function() {
 })
 }, 2200);
 
-
-
-
 });
 
 
@@ -220,11 +212,6 @@ const closeApp = document.getElementById('exit');
 closeApp.addEventListener('click', () => {
     ipcRenderer.send('close-me')
 });
-
-
-
-
-
 
 
 
