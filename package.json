@@ -1,0 +1,76 @@
+{
+  "name": "fixthesubs",
+  "productName": "fixthesubs",
+  "version": "1.0.0",
+  "description": "Fix subtitle encoding for local languages (bosnian, croatian, serbian)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
+    "build-installer":"electron-builder"
+  },
+
+  "build": {
+   "appId": "fixthesubs",
+   "win":{
+     "target":["nsis"],
+     "icon": "icon.ico"
+   },
+   "nsis":{
+     "installerIcon":"icon.ico",
+     "uninstallerIcon":"icon.ico",
+     "uninstallDisplayName":"fixthesubs",
+     "license":"license.txt",
+     "oneClick":false,
+     "allowToChangeInstallationDirectory":true
+   }
+  },
+
+  "keywords": [],
+  "author": "Adi K.",
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "fixthesubs.v1"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "dependencies": {
+ 
+    "electron-squirrel-startup": "^1.0.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.6.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "electron": "12.0.0"
+  }
+}

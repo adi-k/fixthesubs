@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+			<title>fixthesubs</title>
+			<link rel="stylesheet" href="bulma.css">
+            <link rel="stylesheet" href="notify.css" />
+            <script src="notifymin.js"></script>
+            <style>
+html, body {
+    margin: 0;
+    height: 100%;
+    background-color: powderblue;
+  
+}
+body{
+    -webkit-app-region: drag;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+#inputUpload {
+    display: none;
+}
+#dugme{
+    display:none;
+}
+.custom-file-upload {
+    cursor: pointer;
+    font-size: inherit;
+  
+}
+
+.card{
+    -webkit-app-region: no-drag;
+}
+.notify, .notify--fade, .notify--fadein , .notify--slide, .notify--slideIn{
+    -webkit-app-region: no-drag;
+
+}
+            </style>
+			</head>
+			<body>
+                
+                <div class="card">
+                    <footer class="card-footer">
+                      <a href="#" class="card-footer-item"> <label for="inputUpload" class="custom-file-upload">Upload</label><input id="inputUpload" type="file" multiple/></a>
+                      <a href="#" class="card-footer-item"> <label for="dugme" class="custom-file-upload">Download</label><button class="card-footer-item" id="dugme"></button></a>
+                      <a href="#" id="exit" class="card-footer-item">Exit</a>
+                    </footer>
+                  </div>
+
+
+            </body>
+         
+
+<script>
+   const electron = require('electron');
+
+var fs = require('fs');
+var JSZip = require("jszip");
+var FileSaver = require('file-saver');
+
+var stringContent = [];
+var stringFileName = [];
+
+//needed for checking if file is ansi or utf-8
+const arr = ['č', 'ć', 'đ'];
+
+var count = [];
+
+
+
+
+const input = document.querySelector('input[type="file"]');
+
+input.addEventListener('change', function(e) {
+    var stringic = '';
+    var utfOrAnsi = false;
+    var file;
+
+    stringContent = [];
+    stringFileName = [];
+
+    //checks at what position a change has been detected
+    count = [];
+
+    let reader = new FileReader();
+
+    for (let i = 0; i < input.files.length; i++) {
+        (function(file) {
+            var reader = new FileReader();
+            reader.onload = (file) => {
+
+                stringic = reader.result;
+
+                utfOrAnsi = contains(stringic, arr);
+
+                if (utfOrAnsi === true) {
+                    //     stringContent[i] = stringic;
+                    //     stringFileName[i] = input.files[i].name;
+                    count.push(i);
+                    utfOrAnsi = false;
+                }
+
+
+
+
+            }
+
+            reader.readAsText(input.files[i]);
+        })(input.files[i]);
+    }
+
+
+
+
+    for (let i = 0; i < input.files.length; i++) {
+        (function(file) {
+            var reader = new FileReader();
+            reader.onload = (file) => {
+
+                stringic = reader.result;
+
+                stringic = stringic.replace(/è/g, "č");
+                stringic = stringic.replace(/æ/g, "ć");
+                stringic = stringic.replace(/ð/g, "đ");
+                stringic = stringic.replace(/È/g, "Č");
+                stringic = stringic.replace(/Æ/g, "Ć");
+                stringic = stringic.replace(/Ð/g, "Đ");
+
+                stringic = stringic.replace(/Ã¨/g, "č");
+                stringic = stringic.replace(/Ã¦/g, "ć");
+                stringic = stringic.replace(/Ã°/g, "đ");
+                stringic = stringic.replace(/Ãˆ/g, "Č");
+                stringic = stringic.replace(/Ã†/g, "Ć");
+                stringic = stringic.replace(/Ã/g, "Đ");
+
+                stringic = stringic.replace(/Ä/g, "č");
+                stringic = stringic.replace(/Ä‡/g, "ć");
+                stringic = stringic.replace(/Ä‘/g, "đ");
+                stringic = stringic.replace(/ÄŒ/g, "Č");
+                stringic = stringic.replace(/Ã†/g, "Ć");
+                stringic = stringic.replace(/Ä/g, "Đ");
+                stringContent[i] = stringic;
+                stringFileName[i] = input.files[i].name;
+            }
+
+            reader.readAsText(input.files[i], "Windows-1252");
+        })(input.files[i]);
+   
+    }
+
+//little notification popup lets us know how many files are uploaded
+    new Notify ({
+    title: 'Success.',
+    text: 'Uploaded ' +input.files.length+ ' items',
+    effect: 'slide',
+    status: 'success',
+    speed: 300 ,
+    autoclose: true,
+    autotimeout: 5000,
+    showCloseButton: false,
+    showIcon: false,
+    position: 'left bottom'
+})
+
+
+}, false)
+
+//checks if file is utf-8 or ansi because utf-8 files don't need no fixin', it will return true in case it's utf-8
+function contains(target, pattern) {
+    var value = 0;
+    pattern.forEach(function(word) {
+        value = value + target.includes(word);
+    });
+    return (value === 1)
+}
+
+document.getElementById("dugme").addEventListener("click", function() {
+
+    var zip = new JSZip();
+
+    for (let i = 0; i < stringContent.length; i++) {
+
+        zip.file(stringFileName[i], stringContent[i]);
+    }
+    zip.generateAsync({
+            type: "blob"
+        })
+        .then(function(content) {
+            saveAs(content, "popravljenititlovi.zip");
+        });
+
+
+    setTimeout(function() {
+   //little cute notification 
+   new Notify ({
+    title: 'Success.',
+    text: 'Downloaded ' +stringContent.length+ ' fixed subtitles!',
+    status: 'success',
+    effect: 'slide',
+    speed: 300 ,
+    autoclose: true,
+    autotimeout: 5000,
+    showCloseButton: false,
+    showIcon: false,
+    position: 'right bottom'
+})
+}, 2200);
+
+
+
+
+});
+
+
+const {ipcRenderer} = require('electron');
+const closeApp = document.getElementById('exit');
+closeApp.addEventListener('click', () => {
+    ipcRenderer.send('close-me')
+});
+
+
+
+
+
+
+
+
+</script>
+
+</html>
+
+
